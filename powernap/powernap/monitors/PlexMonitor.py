@@ -34,14 +34,37 @@ class PlexMonitor():
         logging.getLogger("requests").setLevel(logging.WARNING)
         logging.getLogger("plexapi").setLevel(logging.WARNING)
         print(logging.Logger.manager.loggerDict)
+        # start background thread
+        self._active = False
+        self._lock = threading.Lock()
+        self._thread = threading.Thread(target=self.thread_main)
+        self._thread.start()
+
+    def thread_main(self):
+        while True:
+            active = self.checkPlexClientsActive()
+            self._lock.acquire()
+            self._active = active
+            self._lock.release()
+            time.sleep(1)
+
+    def checkPlexClientsActive(self):
+        try:
+            plex = PlexServer(self._baseurl, self._token)
+            for client in plex.clients():
+                if client.isPlayingMedia():
+                    return True
+        except:
+            pass
+        return False
 
     # Check for plex clients
     def active(self):
-        plex = PlexServer(self._baseurl, self._token)
-        for client in plex.clients():
-            if client.isPlayingMedia():
-                return True
-        return False
+        self._lock.acquire()
+        active = self._active
+        self._lock.release()
+        return active
+            
 
     def start(self):
         pass
