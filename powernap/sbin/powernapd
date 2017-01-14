@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3.6
 #
 #    powernapd - monitor a system process table; if IDLE amount of time
 #               goes by with no MONITORED_PROCESSES running, run ACTION
